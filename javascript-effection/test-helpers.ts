@@ -1,5 +1,5 @@
 import { createContext, createScope, type Operation } from "effection";
-import { copy } from "jsr:@std/io@0.225";
+import { copy } from "@std/io";
 import { describe as $describe, after, afterEach, before, beforeEach, it } from "node:test";
 import { GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 import { createRequestFn, type TestRequest } from "./easyracer.ts";

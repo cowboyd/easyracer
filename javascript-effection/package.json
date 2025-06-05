@@ -4,15 +4,17 @@
   "private": true,
   "type": "module",
   "dependencies": {
+    "@std/io": "jsr:^0.225",
     "effection": "^3.5.0",
     "expect": "*",
-    "tsx": "^4.19.3",
-    "testcontainers": "^11.0.0"
+    "testcontainers": "^11.0.0",
+    "tsx": "^4.19.3"
   },
   "scripts": {
     "test": "npx tsx --test easyracer.test.ts"
   },
   "volta": {
-    "node": "23.11.0"
+    "node": "23.11.0",
+    "yarn": "4.9.2"
   }
 }
