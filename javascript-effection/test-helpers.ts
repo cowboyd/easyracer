@@ -1,17 +1,19 @@
-import { afterEach, beforeEach, describe as $describe, it, before, after } from "node:test";
-import { createScope, type Operation, createContext } from "effection";
-import { createRequestFn, type TestRequest } from "./easyracer.ts";
+import { createContext, createScope, type Operation } from "effection";
 import { copy } from "jsr:@std/io@0.225";
+import { describe as $describe, after, afterEach, before, beforeEach, it } from "node:test";
 import { GenericContainer, StartedTestContainer, Wait } from "testcontainers";
+import { createRequestFn, type TestRequest } from "./easyracer.ts";
 
 let [scope, destroy] = createScope();
 
 const HttpPortContext = createContext<number | undefined>("httpPort");
+const connections: Deno.Conn[] = [];
 
 export function describe(name: string, fn: () => void): void {
   let container: StartedTestContainer;
   $describe(name, () => {
     before(async () => {
+
       startProxy();
       container = await new GenericContainer("ghcr.io/jamesward/easyracer")
             .withExposedPorts(8080)
@@ -31,6 +33,10 @@ export function describe(name: string, fn: () => void): void {
 
     after(async () => {
       await container.stop();
+      connections.forEach((tcpConn) => {
+        tcpConn.close();
+      });
+      connections.length = 0;
     }, { timeout: 30_000 });
   });
 }
@@ -68,7 +74,7 @@ export async function startProxy(port: number = 2375) {
   Deno.env.set("DOCKER_HOST", `tcp://localhost:${port}`);
 
   for await (const tcpConn of tcpListener) {
-    handleConnection(tcpConn);
+    connections.push(...(await handleConnection(tcpConn)));
   }
 
   return tcpListener;
@@ -77,45 +83,16 @@ export async function startProxy(port: number = 2375) {
 async function handleConnection(tcpConn: Deno.Conn) {
   let unixConn: Deno.Conn | undefined;
 
-  try {
-    unixConn = await Deno.connect({
-      transport: "unix",
-      path: "/var/run/docker.sock",
-    });
+  unixConn = await Deno.connect({
+    transport: "unix",
+    path: "/var/run/docker.sock",
+  });
 
-    const copyPromises = [
-      copy(tcpConn, unixConn).catch((err) => {
-        if (err.code !== "EPIPE") {
-          console.error("TCP -> Unix error:", err);
-        }
-      }),
-      copy(unixConn, tcpConn).catch((err) => {
-        if (err.code !== "EPIPE") {
-          console.error("Unix -> TCP error:", err);
-        }
-      }),
-    ];
+  copy(tcpConn, unixConn).catch(() => {});
 
-    // Wait for either copy operation to complete or fail
-    await Promise.all(copyPromises).finally(() => {
-      // Ensure both connections are properly closed
-      try {
-        unixConn?.close();
-        tcpConn.close();
-      } catch (closeErr) {
-        console.error("Error during connection cleanup:", closeErr);
-      }
-    });
-  } catch (error) {
-    console.error("Connection error:", error);
-  } finally {
-    // Extra safety: ensure connections are closed even if something goes wrong above
-    try {
-      unixConn?.close();
-      tcpConn.close();
-    } catch {
-      // Ignore errors during emergency cleanup
-    }
-  }
+  copy(unixConn, tcpConn).catch(() => {});
+
+
+  return [tcpConn, unixConn];
 }
 
