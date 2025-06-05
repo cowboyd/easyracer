@@ -4,9 +4,10 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "effection": "^3.4.0",
+    "effection": "^3.5.0",
     "expect": "*",
-    "tsx": "^4.19.3"
+    "tsx": "^4.19.3",
+    "testcontainers": "^11.0.0"
   },
   "scripts": {
     "test": "npx tsx --test easyracer.test.ts"

@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "test": "deno test --allow-sys --allow-net --v8-flags=--max-old-space-size=8192",
+    "test": "deno test --allow-sys --allow-net --v8-flags=--max-old-space-size=8192 --allow-env --allow-read --allow-write --allow-run",
     "test:node": "npx tsx --test *.test.ts"
   },
   "lint": {
@@ -9,9 +9,10 @@
     }
   },
   "imports": {
-    "effection": "jsr:@effection/effection@^3.4.0",
+    "effection": "jsr:@effection/effection@^3.5.0",
     "expect": "jsr:@std/expect@^1.0.14",
-    "node:test": "jsr:@std/testing/bdd"
+    "node:test": "jsr:@std/testing/bdd",
+    "testcontainers": "npm:testcontainers@11.0.0"
   },
   "nodeModulesDir": "auto"
 }
