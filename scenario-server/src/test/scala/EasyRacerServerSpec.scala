@@ -41,7 +41,7 @@ object EasyRacerServerSpec extends ZIOSpecDefault:
         val server = ZIO.service[Server].run
         val port = server.port.run
         val url = ZIO.fromEither(URL.decode(s"http://localhost:$port/3")).run
-        val reqs = Seq.fill(10000)(Client.batched(Request.get(url)))
+        val reqs = Seq.fill(10000)(Client.batched(Request.get(url)).filterOrFail(_.status.isSuccess)(Exception("wrong")))
         val winner = ZIO.raceAll(reqs.head, reqs.tail).run
         val body = winner.body.asString.run
         TestClock.adjust(1.minute).run // todo: Something with DnsResolver seems to be hanging this test unless we move the clock forward

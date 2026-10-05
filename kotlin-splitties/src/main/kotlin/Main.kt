@@ -55,7 +55,10 @@ suspend fun scenario3(url: (Int) -> String) = coroutineScope {
     race {
         repeat(10_000) {
             launchRacer {
-                client.get(url(3))
+                client.get(url(3)).let {
+                    if (it.status.isSuccess()) it
+                    else awaitCancellation()
+                }
             }
         }
     }.bodyAsText()

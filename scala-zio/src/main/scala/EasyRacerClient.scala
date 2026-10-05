@@ -32,7 +32,8 @@ object EasyRacerClient extends ZIOAppDefault:
   def scenario3(scenarioUrl: Int => String) =
     defer:
       val url = scenarioUrl(3)
-      val reqs = Seq.fill(10000)(Client.batched(Request.get(url)))
+      val req = Client.batched(Request.get(url)).filterOrFail(_.status.isSuccess)(Error())
+      val reqs = Seq.fill(10000)(req)
       val winner = ZIO.raceAll(reqs.head, reqs.tail).run
       winner.body.asString.run
 

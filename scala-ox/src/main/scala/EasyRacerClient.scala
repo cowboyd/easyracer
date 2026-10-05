@@ -29,7 +29,7 @@ object EasyRacerClient extends OxApp.Simple:
   def scenario3(scenarioUrl: Int => Uri): String =
     val url = scenarioUrl(3)
     val reqs = Seq.fill(10000): () =>
-      scenarioRequest(url).send(backend)
+      basicRequest.get(url).response(asString.getRight).send(backend)
     raceSuccess(reqs).body
 
   def scenario4(scenarioUrl: Int => Uri): String =

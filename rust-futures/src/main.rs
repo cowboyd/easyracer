@@ -43,7 +43,7 @@ async fn scenario_3() -> String {
     let client = Client::new();
 
     async fn req(client: Client) -> Result<String, reqwest::Error> {
-        client.get("http://localhost:8080/3").send().await?.text().await
+        client.get("http://localhost:8080/3").send().await?.error_for_status()?.text().await
     }
 
     let mut reqs = futures::stream::FuturesUnordered::new();
@@ -52,8 +52,10 @@ async fn scenario_3() -> String {
         reqs.push(req(cloned_client));
     }
 
-    while let Some(Ok(result)) = reqs.next().await {
-        return result;
+    while let Some(result) = reqs.next().await {
+        if let Ok(text) = result {
+            return text;
+        }
     }
 
     panic!("all futures failed");

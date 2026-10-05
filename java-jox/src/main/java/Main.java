@@ -53,9 +53,14 @@ public class Main {
         public String scenario3() throws ExecutionException, InterruptedException {
             var req = HttpRequest.newBuilder(url.resolve("/3")).build();
             List<Callable<HttpResponse<String>>> reqs =
-                    Collections.nCopies(10_000, () ->
-                        client.send(req, HttpResponse.BodyHandlers.ofString())
-                    );
+                    Collections.nCopies(10_000, () -> {
+                        var resp = client.send(req, HttpResponse.BodyHandlers.ofString());
+                        if (resp.statusCode() == 200) {
+                            return resp;
+                        } else {
+                            throw new Exception("invalid response");
+                        }
+                    });
             return race(reqs).body();
         }
 

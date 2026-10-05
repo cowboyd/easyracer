@@ -63,7 +63,7 @@ object EasyRacerClient:
     Flow[HttpFlow].map(scenarioRequestFlow).flatMapConcat: scenarioReq =>
       val path = Uri("/3")
       val req = Source.single(path).via(scenarioReq).collect:
-        case Success((_, body)) => body
+        case Success((status, body)) if status.isSuccess => body
 
       Seq.fill(10_000)(req)
         // Uncomment on macOS

@@ -62,6 +62,8 @@ async def scenario3(port: int):
         async with httpx.AsyncClient(limits=limits) as client:
             async def req():
                 response = await client.get(url(port, 3))
+                if response.status_code != 200:
+                    raise Exception("invalid response")
                 return response.text
 
             return await race(*[req for _ in range(10_000)])

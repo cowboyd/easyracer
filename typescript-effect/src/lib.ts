@@ -33,7 +33,8 @@ function scenario3(port: number) {
     const req = Effect.scoped(
         Effect.gen(function*() {
             const resp = yield* HttpClient.get(scenarioUrl(port, 3))
-            return yield* resp.text
+            const valid = yield* HttpClientResponse.filterStatusOk(resp)
+            return yield* valid.text
         })
     )
 

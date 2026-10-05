@@ -50,7 +50,7 @@ pub async fn scenario_3(port: u16) -> String {
     let (tx, mut rx) = mpsc::channel(1);
 
     async fn req(port: u16, client: reqwest::Client) -> Result<String, reqwest::Error> {
-        client.get(url(port, "3")).send().await?.text().await
+        client.get(url(port, "3")).send().await?.error_for_status()?.text().await
     }
 
     for _ in 0..10_000 {
@@ -62,7 +62,15 @@ pub async fn scenario_3(port: u16) -> String {
         });
     }
 
-    rx.recv().await.unwrap().unwrap()
+    drop(tx);
+
+    while let Some(result) = rx.recv().await {
+        if let Ok(text) = result {
+            return text;
+        }
+    }
+
+    panic!("all failed")
 }
 
 pub async fn scenario_4(port: u16) -> String {

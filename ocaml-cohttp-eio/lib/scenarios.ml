@@ -70,7 +70,7 @@ let scenario_3 port =
   let counts = List.init 10000 (fun i -> i) in
   (* NOTE: Allow more than 10000 files to be opened: ulimit -n 12000 *)
   let requests =
-    List.map (fun _ () -> make_request ~port ~path ~net ()) counts
+    List.map (fun _ () -> make_request_check_status ~port ~path ~net ()) counts
   in
   let _, body = any_success requests in
   match body with Some c -> c | None -> "empty"

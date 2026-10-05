@@ -69,6 +69,8 @@ async def scenario3(port: int):
     async with aiohttp.ClientSession(connector=connector) as session:
         async def req():
             async with session.get(url(port, 3)) as response:
+                if response.status != 200:
+                    raise asyncio.CancelledError
                 return await response.text()
 
         async with FirstCompletedTaskGroup() as group:

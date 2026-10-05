@@ -49,9 +49,10 @@ def scenario3(url: str):
     async def _req():
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as response:
+                response.raise_for_status()
                 return await response.text()
 
-    def req(): return rx.from_future(asyncio.ensure_future(_req()))
+    def req(): return rx.from_future(asyncio.ensure_future(_req())) >> ops.catch(rx.empty())
 
     return rx.merge(*[req() for req in [req] * 10_000]) >> ops.first()
     # Or:

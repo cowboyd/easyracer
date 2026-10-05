@@ -68,7 +68,9 @@ object EasyRacerClient:
         Future:
           // Uncomment on macOS
 //          AsyncOperations.sleep((idx / 2).milliseconds)
-          scenarioRequest(url).asyncGet.getResponseBody
+          val resp = scenarioRequest(url).asyncGet
+          require(200 until 400 contains resp.getStatusCode)
+          resp.getResponseBody
     reqs.awaitFirstWithCancel
 
   def scenario4(scenarioUrl: Int => String)(using Async.Spawn): String =

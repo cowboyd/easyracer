@@ -59,9 +59,14 @@ public class Main {
             try (var scope = new StructuredTaskScope.ShutdownOnSuccess<HttpResponse<String>>()) {
                 IntStream.rangeClosed(1, 10_000)
                         .forEach(i ->
-                                scope.fork(() ->
-                                        client.send(req, HttpResponse.BodyHandlers.ofString())
-                                )
+                                scope.fork(() -> {
+                                    var resp = client.send(req, HttpResponse.BodyHandlers.ofString());
+                                    if (resp.statusCode() == 200) {
+                                        return resp;
+                                    } else {
+                                        throw new Exception("invalid response");
+                                    }
+                                })
                         );
 
                 scope.join();

@@ -52,7 +52,12 @@ export async function scenario2(port) {
 export async function scenario3(port) {
     const req = async (signal) => {
         const resp = await fetch(url(port, 3), { signal })
-        return resp.text()
+        if (resp.status >= 300) {
+            return Promise.reject(new Error("Not a successful response"))
+        }
+        else {
+            return resp.text()
+        }
     }
     const reqs = Array.from(new Array(10000), () => req)
     return raceWithCancellation(reqs)

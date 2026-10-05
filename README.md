@@ -27,6 +27,7 @@ A scenario server validates the implementations of 11 scenarios:
     GET /3
     ```
     The winner returns a 200 response with a body containing `right`
+    The losers return a 500 response
 
 4. Race 2 concurrent requests but 1 of them should have a 1 second timeout
     ```
